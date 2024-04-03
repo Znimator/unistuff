@@ -23,7 +23,7 @@ def checkDuplicate(duplicate: int, word: str) -> str:
         return word
 
 def checkDifferent(different: bool, word: str) -> str:
-    word = word.lower()
+    word = word.lower() #a
     
     pass
 
