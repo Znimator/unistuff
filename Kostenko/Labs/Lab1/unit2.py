@@ -8,7 +8,7 @@ def teilor(x, q):
     if -1 < x < 1: 
         while True: 
             if n + 1 != 0: 
-                a = 2 * ((Decimal(x) ** (2 * n + 1)) / (2 * n + 1)) 
+                a = 2 * (((x - 1) ** (2 * n + 1)) / ((2 * n + 1) * ((x + 1) ** (2 * n + 1)))) 
                 n += 1 
                 answer += a 
             if abs(a) < q: 

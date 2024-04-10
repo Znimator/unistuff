@@ -2,7 +2,7 @@ from math import sqrt
 
 
 def h(x, r):
-    if x >= -4 and x < -2: return (x, x + 3)
+    if x >= -7 and x <= -6: return (x, x + 3)
     elif x >= -2 and x < 4: return (x, (-0.5) * x)
     elif x >= 4 and x <= 6: return (x, -2)
     elif x > 6 and x <= 10: return (x, sqrt(4 - (x-8) ** 2) - 2)
