@@ -41,23 +41,25 @@ def check_fsort(f_sort: bool, data: list) -> list:
     else:
         return sorted(data, key=len, reverse=True)
 
-def processing_words(passingData: list, choice: str = None, duplicate: int = None, differents: bool = None, f_sort: bool = None) -> list:
+def processing_words(passingData: list, **params) -> list:
+
     toReturn = passingData
 
-    if choice != None:
-        toReturn = check_choice(choice, toReturn)
+    if params.get("choice") != None:
+        toReturn = check_choice(params.get("choice"), toReturn)
         print(toReturn)
-    if duplicate != None:
-        toReturn = check_duplicate(duplicate, toReturn)
+    if params.get("duplicate") != None:
+        toReturn = check_duplicate(params.get("duplicate"), toReturn)
         print(toReturn)
-    if differents != None:
-        toReturn = check_differents(differents, toReturn)
+    if params.get("differents") != None:
+        toReturn = check_differents(params.get("differents"), toReturn)
         print(toReturn)
-    if f_sort != None:
-        toReturn = check_fsort(f_sort, toReturn)
+    if params.get("f_sort") != None:
+        toReturn = check_fsort(params.get("f_sort"), toReturn)
         print(toReturn)
 
     return list(toReturn)
 
-newData = processing_words(data, f_sort=False, differents=True)
+params = {"f_sort": False, "differents": True}
+newData = processing_words(data, **params)
 print(newData)
