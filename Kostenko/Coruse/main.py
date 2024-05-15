@@ -16,6 +16,10 @@ class Window(QMainWindow):
 
         self.menu_bar = QMenuBar()
 
+        p = self.palette()
+        p.setColor(self.backgroundRole(), Qt.GlobalColor.blue)
+        self.setPalette(p)
+
         self.menu = QMenu("Файл")
         action1 = self.menu.addAction("Сохранить")
         action1.triggered.connect(self.export)
