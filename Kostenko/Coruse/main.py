@@ -68,12 +68,11 @@ class Main(QWidget):
         layout = QVBoxLayout()
         self.setLayout(layout)
         
-        self.context_menu = QMenu()
-        action1 = self.context_menu.addAction("Удалить линию")
-        action2 = self.context_menu.addAction("Добавить линию")
+        self.add_row = QPushButton("Добавить линию")
+        self.remove_row = QPushButton("Удалить линию")
 
-        action1.triggered.connect(self.deleteRow)
-        action2.triggered.connect(self.addRow)
+        self.add_row.clicked.connect(self.addRow)
+        self.remove_row.clicked.connect(self.deleteRow)
 
         self.selectedRow = 0
 
@@ -85,6 +84,8 @@ class Main(QWidget):
         self.list.itemClicked.connect(self.listClick)
 
         layout.addWidget(self.search)
+        layout.addWidget(self.add_row)
+        layout.addWidget(self.remove_row)
         layout.addWidget(self.list)
         layout.setAlignment(self.list, Qt.AlignmentFlag.AlignCenter)
         
@@ -94,8 +95,10 @@ class Main(QWidget):
 
         for name in self.workbook.sheetnames:
             tableWidget = QTableWidget()
-            tableWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
-            tableWidget.customContextMenuRequested.connect(self.contextMenu)
+            #tableWidget.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+            #tableWidget.customContextMenuRequested.connect(self.contextMenu)
+
+            tableWidget.cellClicked.connect(self.cellClicked)
 
             self.temp_sheets[self.workbook[name]] = tableWidget
             tableWidget.hide()
@@ -166,11 +169,8 @@ class Main(QWidget):
         self.currentWidget.removeRow(self.selectedRow)
         print(*args)
 
-    def contextMenu(self, pos :QPoint):
-        print(pos)
-        self.selectedRow = self.currentWidget.rowAt(pos.y())
-        print(self.selectedRow)
-        self.context_menu.exec(self.currentWidget.mapToGlobal(pos))
+    def cellClicked(self, row, column):
+        self.selectedRow = row
         
 
 
