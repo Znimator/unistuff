@@ -2,6 +2,7 @@ from PyQt6.QtCore import *
 from PyQt6.QtWidgets import *
 import openpyxl
 import sys
+import time
 
 class TableWidgetItem(QTableWidgetItem):
     def __lt__(self, other):
@@ -23,6 +24,12 @@ class Window(QMainWindow):
         self.menu_bar.addMenu(self.menu)
 
         self.setMenuBar(self.menu_bar)
+
+    def closeEvent(self, event):
+        print("closing")
+        widget.DataWindow.close()
+
+        event.accept()
 
     def export(self):
         filename, filter = QFileDialog.getSaveFileName(self, 'Save file', '','Excel files (*.xlsx)')
@@ -60,16 +67,82 @@ class Window(QMainWindow):
         wb.save(filename)
 
 
+class DataWindow(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.setWindowTitle("Add Data")
+        self.setFixedSize(500, 500)
+
+        self.Layout = QVBoxLayout()
+        self.setLayout(self.Layout)
+
+        self.addButton = QPushButton("Добавить")
+        self.addButton.clicked.connect(self.acceptInfo)
+        self.Layout.addWidget(self.addButton)
+        
+        self.inputs :list[QLineEdit] = []
+        self.labels :list[QLabel] = []
+
+    def acceptInfo(self):
+        widget.currentWidget.insertRow(0)
+
+        for i in range(len(self.labels)):
+            print(0, i)
+            item = TableWidgetItem(str(self.inputs[i].text()))
+
+            widget.currentWidget.setItem(0 , i, item)
+
+    def load(self):
+        print("loading stuff")
+
+        self.Layout.removeWidget(self.addButton)
+
+        labels = []
+
+        for c in range(widget.currentWidget.columnCount()):
+            label = widget.currentWidget.horizontalHeaderItem(c)
+            labels.append(str(c+1) if label is None else label.text())
+        
+        for l in range(len(labels)):
+            label = QLabel(labels[l])
+            lineEdit = QLineEdit()
+            self.Layout.addWidget(label)
+            self.Layout.addWidget(lineEdit)
+
+            #self.Layout.insertWidget(self.Layout.count(), self.addButton)
+            self.inputs.append(lineEdit)
+            self.labels.append(label)
+
+        self.Layout.addWidget(self.addButton)
+
+    def closeEvent(self, event):
+        print("clearing stuff")
+
+        for i in reversed(range(self.Layout.count())): 
+            self.Layout.itemAt(i).widget().setParent(None)
+
+        event.accept()
+
+
 class Main(QWidget):
     def __init__(self):
         super(Main, self).__init__()
         self.setWindowTitle("Load Excel data to QTableWidget")
+        self.setBaseSize(700, 700)
         
         layout = QVBoxLayout()
         self.setLayout(layout)
         
+        self.addData = QPushButton("Добавить Информацию")
         self.add_row = QPushButton("Добавить линию")
         self.remove_row = QPushButton("Удалить линию")
+    
+        self.filter_list = QComboBox();
+
+        self.DataWindow = DataWindow()
+
+        self.addData.clicked.connect(self.show_data_window)
 
         self.add_row.clicked.connect(self.addRow)
         self.remove_row.clicked.connect(self.deleteRow)
@@ -83,8 +156,10 @@ class Main(QWidget):
         self.list.setMaximumSize(300, 70)
         self.list.itemClicked.connect(self.listClick)
 
+        layout.addWidget(self.filter_list)
         layout.addWidget(self.search)
-        layout.addWidget(self.add_row)
+        layout.addWidget(self.addData)
+        #layout.addWidget(self.add_row)
         layout.addWidget(self.remove_row)
         layout.addWidget(self.list)
         layout.setAlignment(self.list, Qt.AlignmentFlag.AlignCenter)
@@ -109,22 +184,27 @@ class Main(QWidget):
 
         self.load_data()
 
+    def show_data_window(self):
+        self.DataWindow.show()
+        self.DataWindow.load()
+
     def findName(self):
         name = self.search.text().lower()
         found = False
 
         for row in range(self.currentWidget.rowCount()):
             for column in range(self.currentWidget.columnCount()):
-                item = self.currentWidget.item(row, column)
-                try:
-                    found = name in item.text().lower()
-                    self.currentWidget.setRowHidden(row, not found)
-                    if found:
-                        break
-                except AttributeError:
-                    pass
-
-                
+                header = self.currentWidget.horizontalHeaderItem(column)
+                if header != None:
+                    if header.text() == self.filter_list.currentText(): 
+                        item = self.currentWidget.item(row, column)
+                        try:
+                            found = name in item.text().lower()
+                            self.currentWidget.setRowHidden(row, not found)
+                            if found:
+                                break
+                        except AttributeError:
+                            pass
 
     def listClick(self, item :QListWidgetItem):
         for sheet, widget in self.temp_sheets.items():
@@ -132,6 +212,17 @@ class Main(QWidget):
 
         self.temp_sheets[self.workbook[item.text()]].show()
         self.currentWidget = self.temp_sheets[self.workbook[item.text()]]
+
+        labels = []
+
+        for c in range(self.currentWidget.columnCount()):
+            label = self.currentWidget.horizontalHeaderItem(c)
+            labels.append(str(c+1) if label is None else label.text())
+    
+        self.filter_list.clear()
+
+        for i in labels:
+            self.filter_list.addItem(i)
 
     def load_data(self):
 
@@ -162,7 +253,8 @@ class Main(QWidget):
 
     def addRow(self):
         self.currentWidget.insertRow(self.selectedRow)
-        print()
+
+        return self.selectedRow
 
     def deleteRow(self, *args):
         print(self.selectedRow)
