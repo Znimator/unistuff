@@ -26,7 +26,7 @@ def solve():
 
     row = -1
 
-    for x in range(-5, 6):
+    for x in range(X, 6):
         arg = QTableWidgetItem(x)
         item = QTableWidgetItem(str(chart(x, R)))
 
