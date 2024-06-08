@@ -1,7 +1,17 @@
-from PyQt6.QtCore import *
-from PyQt6.QtWidgets import *
-import sys
-import math
+def password(func):
+    flag = 0
+    def check(x):
+        nonlocal flag
+        if flag == 0:
+            if input("Введите пароль: ") != "admin":
+                print("Неправильный пароль!")
+                return check(x)
+            else:
+                flag = 1
+                return func(x)
+        else:
+            return func(x)
+    return check
 
 def parabola(x):
     return -x ** 2 + 2
@@ -9,53 +19,20 @@ def parabola(x):
 def line(x):
     return x # Потому что 45% линия, значит y = x
 
+@password
+def test(x, y):
+    y1 = parabola(x)
+    y2 = line(x)
 
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    if (Y <= y1 and Y <= y2) or (Y <= y1 and Y >= y2):
+        print("Внутри")
+    else:
+        print("Вне Зоны")
 
-        self.setWindowTitle("Координаты")
-        self.X = QLineEdit()
-        self.X.setPlaceholderText("Координата X")
-        self.Y = QLineEdit()
-        self.Y.setPlaceholderText("Координата Y")
+n = int(input("Введите кол-во координат: "))
+for i in range(n):
+    print("Координата точки:")
+    X = float(input("X: "))
+    Y = float(input("Y: "))
 
-        self.button = QPushButton("Узнать Ответ")
-
-        self.Answer = QLabel("Ответ:")
-
-
-        layout = QVBoxLayout()
-        layout.addWidget(self.X)
-        layout.addWidget(self.Y)
-        layout.addWidget(self.button)
-        layout.addWidget(self.Answer)
-
-        container = QWidget()
-        container.setLayout(layout)
-
-        self.button.clicked.connect(self.answerFunc)
-
-        self.setCentralWidget(container)
-    
-    def answerFunc(self):
-        x = int(self.X.text())
-        y = int(self.Y.text())
-
-        y1 = parabola(x)
-        y2 = line(x)
-
-        if (y <= y1 and y <= y2) or (y <= y1 and y >= y2):
-            self.Answer.setText("Внутри")
-            print("Внутри")
-        else:
-            self.Answer.setText("Вне зоны")
-            print("Вне Зоны")
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-
-    app.exec()
+    test(X, Y)
